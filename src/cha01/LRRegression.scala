@@ -6,6 +6,7 @@ import org.apache.spark.ml.evaluation.RegressionEvaluator
 import org.apache.spark.ml.tuning.{CrossValidator, ParamGridBuilder}
 import org.apache.spark.sql.{Row, SparkSession}
 import cha01.Preprocessing.stringIndexerStages
+import org.apache.spark.mllib.evaluation.RegressionMetrics
 
 
 
@@ -77,7 +78,36 @@ object LRRegression extends App {
     .map{case Row(label: Double, prediction: Double) => (label, prediction) }.rdd
 
   val validPredictionAndLabels =
-    .cvModel.transform()
+    cvModel.transform(Preprocessing.validationData)
+    .select("label","prediction")
+    .map{case Row(label: Double, prediction: Double) => (label, prediction) }.rdd
+
+  /**
+    * 开始计算训练集和预测集的原始预测
+    */
+  val trainRegressionMetrics = new
+  RegressionMetrics(trainPredictionsAndLabels)
+
+  val validRegressionMetrics = new
+  RegressionMetrics(validPredictionAndLabels)
+
+
+  val bestModel = cvModel.bestModel.asInstanceOf[PipelineModel]
+
+  val results =
+    "******************************************" +
+  s"参数训练样本(Param trainSample): ${Preprocessing.trainSample}" +
+  s":训练数据集计数 = ${Preprocessing.trainingData.count()}" +
+  s"测试数据集计数 = ${Preprocessing.testData.count()}" +
+  "*********************************************************" +
+  s"最大迭代参数 = ${MaxIter.mkString(",")}n" +
+  s"K折校验折数 = ${numFolds}n" +
+  "*********************************************************" +
+  s"训练数据的方均误差 = ${trainRegressionMetrics.meanSquaredError}n" +
+  s"训练数据的方均根误差 = ${trainRegressionMetrics.rootMeanSquaredError}n"
+
+  println(results)
+
 
 
 }
