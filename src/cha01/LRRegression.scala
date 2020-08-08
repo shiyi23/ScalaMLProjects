@@ -75,12 +75,12 @@ object LRRegression extends App {
   val trainPredictionsAndLabels =
     cvModel.transform(Preprocessing.trainingData)
     .select("label", "prediction")
-    .map{case Row(label: Double, prediction: Double) => (label, prediction) }.rdd.toDS().cache()
+    .map{case Row(label: Double, prediction: Double) => (label, prediction) }.rdd.cache()
 
   val validPredictionAndLabels =
     cvModel.transform(Preprocessing.validationData)
     .select("label","prediction")
-    .map{case Row(label: Double, prediction: Double) => (label, prediction) }.rdd.toDS().cache()
+    .map{case Row(label: Double, prediction: Double) => (label, prediction) }.rdd.cache()
 
   /**
     * 开始计算训练集和预测集的原始预测
