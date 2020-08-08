@@ -75,12 +75,12 @@ object LRRegression extends App {
   val trainPredictionsAndLabels =
     cvModel.transform(Preprocessing.trainingData)
     .select("label", "prediction")
-    .map{case Row(label: Double, prediction: Double) => (label, prediction) }.rdd
+    .map{case Row(label: Double, prediction: Double) => (label, prediction) }.rdd.toDS().cache()
 
   val validPredictionAndLabels =
     cvModel.transform(Preprocessing.validationData)
     .select("label","prediction")
-    .map{case Row(label: Double, prediction: Double) => (label, prediction) }.rdd
+    .map{case Row(label: Double, prediction: Double) => (label, prediction) }.rdd.toDS().cache()
 
   /**
     * 开始计算训练集和预测集的原始预测
@@ -100,11 +100,11 @@ object LRRegression extends App {
   s":训练数据集计数 = ${Preprocessing.trainingData.count()}" +
   s"测试数据集计数 = ${Preprocessing.testData.count()}" +
   "*********************************************************" +
-  s"最大迭代参数 = ${MaxIter.mkString(",")}n" +
-  s"K折校验折数 = ${numFolds}n" +
+  s"最大迭代参数 = ${MaxIter.mkString(",")}\n" +
+  s"K折校验折数 = ${numFolds}\n" +
   "*********************************************************" +
-  s"训练数据的方均误差 = ${trainRegressionMetrics.meanSquaredError}n" +
-  s"训练数据的方均根误差 = ${trainRegressionMetrics.rootMeanSquaredError}n"
+  s"训练数据的方均误差 = ${trainRegressionMetrics.meanSquaredError}\n" +
+  s"训练数据的方均根误差 = ${trainRegressionMetrics.rootMeanSquaredError}\n"
 
   println(results)
 
