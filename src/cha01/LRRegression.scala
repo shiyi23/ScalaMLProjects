@@ -9,7 +9,6 @@ import cha01.Preprocessing.stringIndexerStages
 import org.apache.spark.mllib.evaluation.RegressionMetrics
 
 
-
 class LRRegression {
 
 }
@@ -106,7 +105,17 @@ object LRRegression extends App {
   s"训练数据的方均误差 = ${trainRegressionMetrics.meanSquaredError}\n" +
   s"训练数据的方均根误差 = ${trainRegressionMetrics.rootMeanSquaredError}\n"
 
-  println(results)
+  println("results: " + results)
+
+  println("在测试集上进行预测")
+
+  cvModel.transform(Preprocessing.testData)
+    .select("id", "prediction")
+    .withColumnRenamed("prediction", "loss")
+    .coalesce(1) //获取单个CSV文件中的所有预测
+    .write.format("com.databricks.spark.csv")
+    .option("header","true")
+    .save("output/result_LR.csv")
 
 
 
